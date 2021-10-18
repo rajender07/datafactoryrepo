@@ -1,0 +1,22 @@
+{
+	"name": "AzureSqlTdbmetadata",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "name",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "metaschemaname",
+			"table": "metatablename"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

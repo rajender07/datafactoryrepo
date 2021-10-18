@@ -1,0 +1,9 @@
+{
+	"name": "adftrain1015",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "4c9e5b0f-b5bc-4d91-ab77-40bc817b2779",
+		"tenantId": "9a20e818-ff55-46db-810f-8ae9980a0876"
+	}
+}

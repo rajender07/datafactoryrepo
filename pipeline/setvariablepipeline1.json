@@ -1,0 +1,97 @@
+{
+	"name": "setvariablepipeline1",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "filename",
+					"value": {
+						"value": "@replace(pipeline().parameters.origfilename,'sales','')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Set variable1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "BinarySource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings"
+						}
+					},
+					"sink": {
+						"type": "BinarySink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "adfstorageacct1015",
+						"type": "DatasetReference",
+						"parameters": {
+							"filename": {
+								"value": "@variables('filename')",
+								"type": "Expression"
+							},
+							"folder": "input"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "adfstorageacct1015",
+						"type": "DatasetReference",
+						"parameters": {
+							"filename": "test",
+							"folder": "output"
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"origfilename": {
+				"type": "string",
+				"defaultValue": "testsales.txt"
+			}
+		},
+		"variables": {
+			"filename": {
+				"type": "String",
+				"defaultValue": "testsales"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-10-15T17:33:13Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

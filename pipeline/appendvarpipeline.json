@@ -1,0 +1,150 @@
+{
+	"name": "appendvarpipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "Append variable1",
+				"type": "AppendVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "listoffilenames",
+					"value": {
+						"value": "@pipeline().parameters.filename",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Filter1",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "Append variable1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('listoffilenames')",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@equals(item(),'india.txt')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Filter1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [
+					{
+						"name": "Source",
+						"value": "data/@{'input'}/@{activity('Filter1').output}"
+					},
+					{
+						"name": "Destination",
+						"value": "data/@{'output'}/@{activity('Filter1').output}"
+					}
+				],
+				"typeProperties": {
+					"source": {
+						"type": "BinarySource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings"
+						}
+					},
+					"sink": {
+						"type": "BinarySink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "adfstorageacct1015",
+						"type": "DatasetReference",
+						"parameters": {
+							"filename": {
+								"value": "@string(activity('Filter1').output.Value[0])",
+								"type": "Expression"
+							},
+							"folder": {
+								"value": "@pipeline().parameters.inputfolder",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "adfstorageacct1015",
+						"type": "DatasetReference",
+						"parameters": {
+							"filename": {
+								"value": "@string(activity('Filter1').output.Value[0])",
+								"type": "Expression"
+							},
+							"folder": {
+								"value": "@pipeline().parameters.outputfolder",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"filename": {
+				"type": "string",
+				"defaultValue": "india.txt"
+			},
+			"folder": {
+				"type": "String"
+			},
+			"inputfolder": {
+				"type": "string"
+			},
+			"outputfolder": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"listoffilenames": {
+				"type": "Array",
+				"defaultValue": [
+					"usa.txt",
+					"europe.txt"
+				]
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-10-15T18:32:07Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
