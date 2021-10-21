@@ -22,6 +22,10 @@
 							"employee": {
 								"filename": "employee.csv",
 								"foldername": "input"
+							},
+							"dept": {
+								"filename": "dept.csv",
+								"foldername": "input"
 							}
 						}
 					},
