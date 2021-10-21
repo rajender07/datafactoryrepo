@@ -19,7 +19,7 @@
 						"referenceName": "filterdataflow1",
 						"type": "DataFlowReference",
 						"datasetParameters": {
-							"source1": {
+							"employee": {
 								"filename": "employee.csv",
 								"foldername": "input"
 							}

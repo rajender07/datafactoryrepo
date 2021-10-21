@@ -7,12 +7,10 @@
 		},
 		"parameters": {
 			"filename": {
-				"type": "String",
-				"defaultValue": "employee.csv"
+				"type": "String"
 			},
 			"foldername": {
-				"type": "String",
-				"defaultValue": "input"
+				"type": "String"
 			}
 		},
 		"annotations": [],
