@@ -16,15 +16,11 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "union_dataflow1",
+						"referenceName": "pivotdataflow",
 						"type": "DataFlowReference",
 						"datasetParameters": {
-							"employee1": {
+							"source1": {
 								"filename": "employee.csv",
-								"foldername": "input"
-							},
-							"dept": {
-								"filename": "dept.csv",
 								"foldername": "input"
 							}
 						}
