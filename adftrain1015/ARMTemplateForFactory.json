@@ -1532,6 +1532,7 @@
 					},
 					"columnDelimiter": ",",
 					"escapeChar": "\\",
+					"firstRowAsHeader": true,
 					"quoteChar": "\""
 				},
 				"schema": []
@@ -1560,28 +1561,11 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataflow": {
-								"referenceName": "filterdataflow1",
+								"referenceName": "union_dataflow1",
 								"type": "DataFlowReference",
-								"parameters": {
-									"empfoldername": {
-										"value": "'@{input}'",
-										"type": "Expression"
-									},
-									"empfilename": {
-										"value": "'@{employee.csv}'",
-										"type": "Expression"
-									},
-									"deptfoldername": {
-										"value": "'@{input}'",
-										"type": "Expression"
-									},
-									"deptfilename": {
-										"value": "'@{dept.csv}'",
-										"type": "Expression"
-									}
-								},
+								"parameters": {},
 								"datasetParameters": {
-									"employee": {
+									"employee1": {
 										"filename": "employee.csv",
 										"foldername": "input"
 									},
@@ -1589,7 +1573,8 @@
 										"filename": "dept.csv",
 										"foldername": "input"
 									},
-									"sink1": {}
+									"newbranchjoinop": {},
+									"newbranchaggop": {}
 								}
 							},
 							"staging": {},
@@ -1608,7 +1593,68 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/filterdataflow1')]"
+				"[concat(variables('factoryId'), '/dataflows/union_dataflow1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/union_dataflow1')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DelimitedText1",
+								"type": "DatasetReference"
+							},
+							"name": "employee1"
+						},
+						{
+							"dataset": {
+								"referenceName": "DelimitedText1",
+								"type": "DatasetReference"
+							},
+							"name": "dept"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "output_DelimitedText2",
+								"type": "DatasetReference"
+							},
+							"name": "newbranchjoinop"
+						},
+						{
+							"dataset": {
+								"referenceName": "output_DelimitedText2",
+								"type": "DatasetReference"
+							},
+							"name": "newbranchaggop"
+						}
+					],
+					"transformations": [
+						{
+							"name": "Join1"
+						},
+						{
+							"name": "Aggregate1"
+						},
+						{
+							"name": "Select1"
+						},
+						{
+							"name": "Select2"
+						}
+					],
+					"script": "source(output(\n\t\tid as short,\n\t\tname as string,\n\t\tsal as short,\n\t\tdept as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> employee1\nsource(output(\n\t\tdeptid as string,\n\t\tdeptname as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> dept\nemployee1, dept join(dept == deptid,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> Join1\nemployee1 aggregate(groupBy(dept),\n\temployeecount = count(id)) ~> Aggregate1\nJoin1 select(mapColumn(\n\t\temployeeName = name,\n\t\tsal,\n\t\temployeeid = id,\n\t\tdeptname\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nAggregate1 select(mapColumn(\n\t\tdept,\n\t\temployeecount\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select2\nSelect1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['newbranch_join_op.csv'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tid = employeeid,\n\t\tname = employeeName,\n\t\tsal,\n\t\tdeptname\n\t),\n\tpartitionBy('hash', 1)) ~> newbranchjoinop\nSelect2 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['newbranch_agg_op.csv'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tdept,\n\t\temployeecount\n\t),\n\tpartitionBy('hash', 1)) ~> newbranchaggop"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DelimitedText1')]",
+				"[concat(variables('factoryId'), '/datasets/output_DelimitedText2')]"
 			]
 		}
 	]
