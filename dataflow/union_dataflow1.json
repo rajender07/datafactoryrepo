@@ -1,5 +1,5 @@
 {
-	"name": "dataflow1",
+	"name": "union_dataflow1",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {

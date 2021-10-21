@@ -16,33 +16,15 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "filterdataflow1",
+						"referenceName": "union_dataflow1",
 						"type": "DataFlowReference",
-						"parameters": {
-							"empfoldername": {
-								"value": "'@{input}'",
-								"type": "Expression"
-							},
-							"empfilename": {
-								"value": "'@{employee.csv}'",
-								"type": "Expression"
-							},
-							"deptfoldername": {
-								"value": "'@{input}'",
-								"type": "Expression"
-							},
-							"deptfilename": {
-								"value": "'@{dept.csv}'",
-								"type": "Expression"
-							}
-						},
 						"datasetParameters": {
-							"employee": {
+							"employee1": {
 								"filename": "employee.csv",
 								"foldername": "input"
 							},
-							"dept": {
-								"filename": "dept.csv",
+							"employee2": {
+								"filename": "employee.csv",
 								"foldername": "input"
 							}
 						}
