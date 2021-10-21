@@ -3,30 +3,17 @@
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
-			"sources": [
-				{
-					"dataset": {
-						"referenceName": "DelimitedText1",
-						"type": "DatasetReference"
-					},
-					"name": "source1"
-				}
-			],
-			"sinks": [
-				{
-					"dataset": {
-						"referenceName": "output_DelimitedText2",
-						"type": "DatasetReference"
-					},
-					"name": "sink1"
-				}
-			],
+			"sources": [],
+			"sinks": [],
 			"transformations": [
 				{
 					"name": "SurrogateKey1"
+				},
+				{
+					"name": "Window2"
 				}
 			],
-			"script": "source(output(\n\t\tid as short,\n\t\tname as string,\n\t\tsal as short,\n\t\tdept as string,\n\t\tgender as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1\nsource1 keyGenerate(output(rowkey as long),\n\tstartAt: 1L) ~> SurrogateKey1\nSurrogateKey1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tid,\n\t\tname,\n\t\tsal,\n\t\tdept,\n\t\tgender,\n\t\trowkey\n\t)) ~> sink1"
+			"script": " keyGenerate(output(rowkey as long),\n\tstartAt: 1L) ~> SurrogateKey1\nSurrogateKey1 window() ~> Window2"
 		}
 	}
 }
