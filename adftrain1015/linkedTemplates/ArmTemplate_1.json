@@ -62,7 +62,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataflow": {
-								"referenceName": "pivotdataflow",
+								"referenceName": "alterrow_dataflow",
 								"type": "DataFlowReference",
 								"parameters": {},
 								"datasetParameters": {
@@ -70,7 +70,10 @@
 										"filename": "employee.csv",
 										"foldername": "input"
 									},
-									"sink1": {}
+									"sink1": {
+										"schemaname": "dbo",
+										"tablename": "emp_test"
+									}
 								}
 							},
 							"staging": {},
