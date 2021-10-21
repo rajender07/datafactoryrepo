@@ -23,8 +23,8 @@
 								"filename": "employee.csv",
 								"foldername": "input"
 							},
-							"employee2": {
-								"filename": "employee.csv",
+							"dept": {
+								"filename": "dept.csv",
 								"foldername": "input"
 							}
 						}

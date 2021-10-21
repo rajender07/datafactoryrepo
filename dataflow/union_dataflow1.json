@@ -16,24 +16,16 @@
 						"referenceName": "DelimitedText1",
 						"type": "DatasetReference"
 					},
-					"name": "employee2"
+					"name": "dept"
 				}
 			],
-			"sinks": [
-				{
-					"dataset": {
-						"referenceName": "output_DelimitedText2",
-						"type": "DatasetReference"
-					},
-					"name": "sink1"
-				}
-			],
+			"sinks": [],
 			"transformations": [
 				{
-					"name": "Union1"
+					"name": "Lookup1"
 				}
 			],
-			"script": "source(output(\n\t\tid as short,\n\t\tname as string,\n\t\tsal as short,\n\t\tdept as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> employee1\nsource(output(\n\t\tid as short,\n\t\tname as string,\n\t\tsal as short,\n\t\tdept as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> employee2\nemployee1, employee2 union(byName: true,\n\tpartitionBy('hash', 1))~> Union1\nUnion1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['employee_union.csv'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tid,\n\t\tname,\n\t\tsal,\n\t\tdept\n\t),\n\tpartitionBy('hash', 1)) ~> sink1"
+			"script": "source(output(\n\t\tid as short,\n\t\tname as string,\n\t\tsal as short,\n\t\tdept as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> employee1\nsource(output(\n\t\tdeptid as string,\n\t\tdeptname as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> dept\ndept, employee1 lookup(deptid == dept,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> Lookup1"
 		}
 	}
 }
