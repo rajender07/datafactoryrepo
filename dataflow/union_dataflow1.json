@@ -19,13 +19,31 @@
 					"name": "dept"
 				}
 			],
-			"sinks": [],
-			"transformations": [
+			"sinks": [
 				{
-					"name": "Lookup1"
+					"dataset": {
+						"referenceName": "output_DelimitedText2",
+						"type": "DatasetReference"
+					},
+					"name": "newbranchjoinop"
+				},
+				{
+					"dataset": {
+						"referenceName": "output_DelimitedText2",
+						"type": "DatasetReference"
+					},
+					"name": "newbranchaggop"
 				}
 			],
-			"script": "source(output(\n\t\tid as short,\n\t\tname as string,\n\t\tsal as short,\n\t\tdept as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> employee1\nsource(output(\n\t\tdeptid as string,\n\t\tdeptname as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> dept\ndept, employee1 lookup(deptid == dept,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> Lookup1"
+			"transformations": [
+				{
+					"name": "Join1"
+				},
+				{
+					"name": "Aggregate1"
+				}
+			],
+			"script": "source(output(\n\t\tid as short,\n\t\tname as string,\n\t\tsal as short,\n\t\tdept as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> employee1\nsource(output(\n\t\tdeptid as string,\n\t\tdeptname as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> dept\nemployee1, dept join(dept == deptid,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> Join1\nemployee1 aggregate(groupBy(dept),\n\temployeecount = count(id)) ~> Aggregate1\nJoin1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['newbranch_join_op.csv'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tid,\n\t\tname,\n\t\tsal,\n\t\tdeptname\n\t),\n\tpartitionBy('hash', 1)) ~> newbranchjoinop\nAggregate1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['newbranch_agg_op.csv'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tdept,\n\t\temployeecount\n\t),\n\tpartitionBy('hash', 1)) ~> newbranchaggop"
 		}
 	}
 }
