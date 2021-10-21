@@ -18,6 +18,24 @@
 					"dataflow": {
 						"referenceName": "filterdataflow1",
 						"type": "DataFlowReference",
+						"parameters": {
+							"empfoldername": {
+								"value": "'@{input}'",
+								"type": "Expression"
+							},
+							"empfilename": {
+								"value": "'@{employee.csv}'",
+								"type": "Expression"
+							},
+							"deptfoldername": {
+								"value": "'@{input}'",
+								"type": "Expression"
+							},
+							"deptfilename": {
+								"value": "'@{dept.csv}'",
+								"type": "Expression"
+							}
+						},
 						"datasetParameters": {
 							"employee": {
 								"filename": "employee.csv",
