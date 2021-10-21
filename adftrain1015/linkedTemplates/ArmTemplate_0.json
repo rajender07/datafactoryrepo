@@ -233,12 +233,10 @@
 				},
 				"parameters": {
 					"filename": {
-						"type": "String",
-						"defaultValue": "employee.csv"
+						"type": "String"
 					},
 					"foldername": {
-						"type": "String",
-						"defaultValue": "input"
+						"type": "String"
 					}
 				},
 				"annotations": [],
@@ -1475,7 +1473,14 @@
 								"referenceName": "DelimitedText1",
 								"type": "DatasetReference"
 							},
-							"name": "source1"
+							"name": "employee"
+						},
+						{
+							"dataset": {
+								"referenceName": "DelimitedText1",
+								"type": "DatasetReference"
+							},
+							"name": "dept"
 						}
 					],
 					"sinks": [
@@ -1485,14 +1490,37 @@
 								"type": "DatasetReference"
 							},
 							"name": "sink1"
+						},
+						{
+							"dataset": {
+								"referenceName": "output_DelimitedText2",
+								"type": "DatasetReference"
+							},
+							"name": "sink2"
+						},
+						{
+							"dataset": {
+								"referenceName": "output_DelimitedText2",
+								"type": "DatasetReference"
+							},
+							"name": "sink3"
 						}
 					],
 					"transformations": [
 						{
-							"name": "Filter1"
+							"name": "Join1"
+						},
+						{
+							"name": "ConditionalSplit1"
+						},
+						{
+							"name": "DerivedColumn1"
+						},
+						{
+							"name": "DerivedColumn2"
 						}
 					],
-					"script": "source(output(\n\t\tid as short,\n\t\tname as string,\n\t\tsal as short,\n\t\tdept as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1\nsource1 filter(equals(dept,'IT')) ~> Filter1\nFilter1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['empfilter.csv'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> sink1"
+					"script": "parameters{\n\tempfoldername as string ('input'),\n\tempfilename as string ('employee.csv'),\n\tdeptfoldername as string ('input'),\n\tdeptfilename as string ('dept.csv')\n}\nsource(output(\n\t\tid as short,\n\t\tname as string,\n\t\tsal as short,\n\t\tdept as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> employee\nsource(output(\n\t\tdeptid as string,\n\t\tdeptname as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> dept\nemployee, dept join(dept == deptid,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> Join1\nJoin1 split(equals(dept,'HR'),\n\tequals(dept,'IT'),\n\tdisjoint: false) ~> ConditionalSplit1@(HR, IT, others)\nConditionalSplit1@HR derive(deptname = upper(trim(deptname))) ~> DerivedColumn1\nConditionalSplit1@others derive(deptname = upper(trim(deptname))) ~> DerivedColumn2\nDerivedColumn1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['HRemployees.csv'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tid,\n\t\tname,\n\t\tsal,\n\t\tdeptname\n\t),\n\tpartitionBy('hash', 1)) ~> sink1\nConditionalSplit1@IT sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['ITemployees.csv'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tid,\n\t\tname,\n\t\tsal,\n\t\tdeptname\n\t),\n\tpartitionBy('hash', 1)) ~> sink2\nDerivedColumn2 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['otheremployees.csv'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tid,\n\t\tname,\n\t\tsal,\n\t\tdeptname\n\t),\n\tpartitionBy('hash', 1)) ~> sink3"
 				}
 			},
 			"dependsOn": [
@@ -1556,11 +1584,17 @@
 								"type": "DataFlowReference",
 								"parameters": {},
 								"datasetParameters": {
-									"source1": {
+									"employee": {
 										"filename": "employee.csv",
 										"foldername": "input"
 									},
-									"sink1": {}
+									"dept": {
+										"filename": "dept.csv",
+										"foldername": "input"
+									},
+									"sink1": {},
+									"sink2": {},
+									"sink3": {}
 								}
 							},
 							"staging": {},
