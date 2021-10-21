@@ -9,7 +9,7 @@
 						"referenceName": "DelimitedText1",
 						"type": "DatasetReference"
 					},
-					"name": "source1"
+					"name": "employee"
 				}
 			],
 			"sinks": [
@@ -23,10 +23,10 @@
 			],
 			"transformations": [
 				{
-					"name": "Filter1"
+					"name": "Aggregate1"
 				}
 			],
-			"script": "source(output(\n\t\tid as short,\n\t\tname as string,\n\t\tsal as short,\n\t\tdept as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1\nsource1 filter(equals(dept,'IT')) ~> Filter1\nFilter1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['empfilter.csv'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> sink1"
+			"script": "source(output(\n\t\tid as short,\n\t\tname as string,\n\t\tsal as short,\n\t\tdept as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> employee\nemployee aggregate(groupBy(dept),\n\tempcount = count(id)) ~> Aggregate1\nAggregate1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['totalemployeeBydept.csv'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> sink1"
 		}
 	}
 }
