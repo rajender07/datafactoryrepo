@@ -1,0 +1,16 @@
+{
+	"name": "trainingsqlDB_dataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "trainingsqlDB",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "SalesLT",
+			"table": "Address"
+		}
+	}
+}
