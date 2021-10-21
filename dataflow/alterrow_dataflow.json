@@ -26,7 +26,7 @@
 					"name": "AlterRow1"
 				}
 			],
-			"script": "source(output(\n\t\tid as integer,\n\t\tname as string,\n\t\tsal as integer,\n\t\tdept as string,\n\t\tgender as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1\nsource1 alterRow(updateIf(gender=='male')) ~> AlterRow1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tempid as integer,\n\t\tname as string,\n\t\tsalary as integer,\n\t\tdept as string,\n\t\tgender as string\n\t),\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError',\n\tmapColumn(\n\t\tempid = id,\n\t\tname,\n\t\tsalary = sal,\n\t\tdept,\n\t\tgender\n\t)) ~> sink1"
+			"script": "source(output(\n\t\tid as integer,\n\t\tname as string,\n\t\tsal as integer,\n\t\tdept as string,\n\t\tgender as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1\nsource1 alterRow(insertIf(gender!='male')) ~> AlterRow1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tempid as integer,\n\t\tname as string,\n\t\tsalary as integer,\n\t\tdept as string,\n\t\tgender as string\n\t),\n\tdeletable:true,\n\tinsertable:true,\n\tupdateable:true,\n\tupsertable:true,\n\tkeys:['empid'],\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError',\n\tmapColumn(\n\t\tempid = id,\n\t\tname,\n\t\tsalary = sal,\n\t\tdept,\n\t\tgender\n\t)) ~> sink1"
 		}
 	}
 }
