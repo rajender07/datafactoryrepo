@@ -801,20 +801,15 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataflow": {
-								"referenceName": "union_dataflow1",
+								"referenceName": "pivotdataflow",
 								"type": "DataFlowReference",
 								"parameters": {},
 								"datasetParameters": {
-									"employee1": {
+									"source1": {
 										"filename": "employee.csv",
 										"foldername": "input"
 									},
-									"dept": {
-										"filename": "dept.csv",
-										"foldername": "input"
-									},
-									"newbranchjoinop": {},
-									"newbranchaggop": {}
+									"sink1": {}
 								}
 							},
 							"staging": {},
@@ -833,7 +828,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/union_dataflow1')]"
+				"[concat(variables('factoryId'), '/dataflows/pivotdataflow')]"
 			]
 		},
 		{
@@ -1684,10 +1679,10 @@
 					],
 					"transformations": [
 						{
-							"name": "Pivot1"
+							"name": "SurrogateKey1"
 						}
 					],
-					"script": "source(output(\n\t\tid as short,\n\t\tname as string,\n\t\tsal as short,\n\t\tdept as string,\n\t\tgender as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1\nsource1 pivot(groupBy(dept),\n\tpivotBy(gender),\n\t{} = count(id),\n\tcolumnNaming: '$N$V',\n\tlateral: true) ~> Pivot1\nPivot1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['emppivot.csv'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> sink1"
+					"script": "source(output(\n\t\tid as short,\n\t\tname as string,\n\t\tsal as short,\n\t\tdept as string,\n\t\tgender as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1\nsource1 keyGenerate(output(rowkey as long),\n\tstartAt: 1L) ~> SurrogateKey1\nSurrogateKey1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tid,\n\t\tname,\n\t\tsal,\n\t\tdept,\n\t\tgender,\n\t\trowkey\n\t)) ~> sink1"
 				}
 			},
 			"dependsOn": [
