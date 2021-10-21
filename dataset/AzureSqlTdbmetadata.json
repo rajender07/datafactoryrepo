@@ -7,25 +7,42 @@
 		},
 		"parameters": {
 			"schemaname": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "dbo"
 			},
 			"tablename": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "emp_test"
 			}
 		},
 		"annotations": [],
 		"type": "AzureSqlTable",
 		"schema": [
 			{
+				"name": "empid",
+				"type": "int",
+				"precision": 10
+			},
+			{
 				"name": "name",
+				"type": "varchar"
+			},
+			{
+				"name": "salary",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "dept",
+				"type": "varchar"
+			},
+			{
+				"name": "gender",
 				"type": "varchar"
 			}
 		],
 		"typeProperties": {
-			"schema": {
-				"value": "@dataset().schemaname",
-				"type": "Expression"
-			},
+			"schema": "dbo",
 			"table": {
 				"value": "@dataset().tablename",
 				"type": "Expression"
