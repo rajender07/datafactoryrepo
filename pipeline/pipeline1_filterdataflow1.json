@@ -16,18 +16,8 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "alterrow_dataflow",
-						"type": "DataFlowReference",
-						"datasetParameters": {
-							"source1": {
-								"filename": "employee.csv",
-								"foldername": "input"
-							},
-							"sink1": {
-								"schemaname": "dbo",
-								"tablename": "emp_test"
-							}
-						}
+						"referenceName": "flatten_dataflow1",
+						"type": "DataFlowReference"
 					},
 					"compute": {
 						"coreCount": 8,
