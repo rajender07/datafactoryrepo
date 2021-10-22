@@ -65,9 +65,17 @@
 								"referenceName": "wraglingdataset",
 								"type": "DatasetReference"
 							}
+						},
+						{
+							"name": "DelimitedText1",
+							"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~>  DelimitedText1",
+							"dataset": {
+								"referenceName": "DelimitedText1",
+								"type": "DatasetReference"
+							}
 						}
 					],
-					"script": "section Section1;\r\nshared wraglingdataset = let\r\n  AdfDoc = AzureStorage.BlobContents(\"https://storageacct1010.blob.core.windows.net/data/input/employee.csv\"),\r\n  Csv = Csv.Document(AdfDoc, [Delimiter = \",\", Encoding = TextEncoding.Utf8, QuoteStyle = QuoteStyle.Csv]),\r\n  PromotedHeaders = Table.PromoteHeaders(Csv, [PromoteAllScalars = true])\r\nin\r\n  PromotedHeaders;\r\nshared UserQuery = let\r\n  Source = wraglingdataset,\r\n  #\"Removed columns\" = Table.RemoveColumns(Source, {\"gender\"})\r\nin\r\n  #\"Removed columns\";\r\n",
+					"script": "section Section1;\r\nshared DelimitedText1 = let\r\n  AdfDoc = AzureStorage.BlobContents(\"https://storageacct1010.blob.core.windows.net/data/input/dept.csv\"),\r\n  Csv = Csv.Document(AdfDoc, [Delimiter = \",\", Encoding = TextEncoding.Utf8, QuoteStyle = QuoteStyle.Csv]),\r\n  PromotedHeaders = Table.PromoteHeaders(Csv, [PromoteAllScalars = true]),\r\n  #\"Grouped rows\" = Table.Group(PromotedHeaders, {\"deptname\"}, {{\"Count\", each Table.RowCount(_), Int64.Type}})\r\nin\r\n  #\"Grouped rows\";\r\nshared wraglingdataset = let\r\n  AdfDoc = AzureStorage.BlobContents(\"https://storageacct1010.blob.core.windows.net/data/input/employee.csv\"),\r\n  Csv = Csv.Document(AdfDoc, [Delimiter = \",\", Encoding = TextEncoding.Utf8, QuoteStyle = QuoteStyle.Csv]),\r\n  PromotedHeaders = Table.PromoteHeaders(Csv, [PromoteAllScalars = true])\r\nin\r\n  PromotedHeaders;\r\nshared UserQuery = let\r\n  Source = wraglingdataset,\r\n  #\"Merged queries\" = Table.NestedJoin(Source, {\"id\"}, DelimitedText1, {\"deptid\"}, \"DelimitedText1\", JoinKind.FullOuter),\r\n  #\"Expanded DelimitedText1\" = Table.ExpandTableColumn(#\"Merged queries\", \"DelimitedText1\", {\"deptid\", \"deptname\"}, {\"DelimitedText1.deptid\", \"DelimitedText1.deptname\"}),\r\n  #\"Renamed columns\" = Table.RenameColumns(#\"Expanded DelimitedText1\", {{\"DelimitedText1.deptid\", \"deptid\"}, {\"DelimitedText1.deptname\", \"deptname\"}})\r\nin\r\n  #\"Renamed columns\";\r\n",
 					"documentLocale": "en-us"
 				}
 			},
@@ -240,6 +248,68 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/dataflows/validatedataflow1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/powerquerypipeline1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Power Query1",
+						"type": "ExecuteWranglingDataflow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "1.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "powerquery1",
+								"type": "DataFlowReference",
+								"datasetParameters": {
+									"wraglingdataset": {},
+									"DelimitedText1": {},
+									"Sinkoutput_DelimitedText2": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"queries": [
+								{
+									"queryName": "UserQuery",
+									"dataflowSinks": [
+										{
+											"name": "Sinkoutput_DelimitedText2",
+											"dataset": {
+												"referenceName": "output_DelimitedText2",
+												"type": "DatasetReference",
+												"parameters": {}
+											},
+											"script": "sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Sinkoutput_DelimitedText2"
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/powerquery1')]"
 			]
 		}
 	]

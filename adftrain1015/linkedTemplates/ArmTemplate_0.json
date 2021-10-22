@@ -264,10 +264,12 @@
 				},
 				"parameters": {
 					"filename": {
-						"type": "String"
+						"type": "String",
+						"defaultValue": "dept.csv"
 					},
 					"foldername": {
-						"type": "String"
+						"type": "String",
+						"defaultValue": "input"
 					}
 				},
 				"annotations": [],
@@ -290,7 +292,16 @@
 					"firstRowAsHeader": true,
 					"quoteChar": "\""
 				},
-				"schema": []
+				"schema": [
+					{
+						"name": "deptid",
+						"type": "String"
+					},
+					{
+						"name": "deptname",
+						"type": "String"
+					}
+				]
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
