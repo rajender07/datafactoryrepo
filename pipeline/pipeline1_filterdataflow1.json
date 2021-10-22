@@ -16,12 +16,12 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "flatten_dataflow1",
+						"referenceName": "validatedataflow1",
 						"type": "DataFlowReference",
-						"parameters": {
-							"name": {
-								"value": "'@{pipeline().parameters.pipeline_name}'",
-								"type": "Expression"
+						"datasetParameters": {
+							"source1": {
+								"filename": "employee.csv",
+								"foldername": "input"
 							}
 						}
 					},
