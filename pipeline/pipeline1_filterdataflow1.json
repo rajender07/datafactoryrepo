@@ -33,11 +33,6 @@
 				}
 			}
 		],
-		"parameters": {
-			"pipeline_name": {
-				"type": "string"
-			}
-		},
 		"annotations": []
 	}
 }
