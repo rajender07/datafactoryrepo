@@ -6,14 +6,22 @@
 			"sources": [
 				{
 					"name": "wraglingdataset",
-					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~>  wraglingdataset",
+					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> wraglingdataset",
 					"dataset": {
 						"referenceName": "wraglingdataset",
 						"type": "DatasetReference"
 					}
+				},
+				{
+					"name": "DelimitedText1",
+					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~>  DelimitedText1",
+					"dataset": {
+						"referenceName": "DelimitedText1",
+						"type": "DatasetReference"
+					}
 				}
 			],
-			"script": "section Section1;\r\nshared wraglingdataset = let\r\n  AdfDoc = AzureStorage.BlobContents(\"https://storageacct1010.blob.core.windows.net/data/input/employee.csv\"),\r\n  Csv = Csv.Document(AdfDoc, [Delimiter = \",\", Encoding = TextEncoding.Utf8, QuoteStyle = QuoteStyle.Csv]),\r\n  PromotedHeaders = Table.PromoteHeaders(Csv, [PromoteAllScalars = true])\r\nin\r\n  PromotedHeaders;\r\nshared UserQuery = let\r\n  Source = wraglingdataset,\r\n  #\"Removed columns\" = Table.RemoveColumns(Source, {\"gender\"})\r\nin\r\n  #\"Removed columns\";\r\n",
+			"script": "section Section1;\r\nshared DelimitedText1 = let\r\n  AdfDoc = AzureStorage.BlobContents(\"https://storageacct1010.blob.core.windows.net/data/input/dept.csv\"),\r\n  Csv = Csv.Document(AdfDoc, [Delimiter = \",\", Encoding = TextEncoding.Utf8, QuoteStyle = QuoteStyle.Csv]),\r\n  PromotedHeaders = Table.PromoteHeaders(Csv, [PromoteAllScalars = true]),\r\n  #\"Grouped rows\" = Table.Group(PromotedHeaders, {\"deptname\"}, {{\"Count\", each Table.RowCount(_), Int64.Type}})\r\nin\r\n  #\"Grouped rows\";\r\nshared wraglingdataset = let\r\n  AdfDoc = AzureStorage.BlobContents(\"https://storageacct1010.blob.core.windows.net/data/input/employee.csv\"),\r\n  Csv = Csv.Document(AdfDoc, [Delimiter = \",\", Encoding = TextEncoding.Utf8, QuoteStyle = QuoteStyle.Csv]),\r\n  PromotedHeaders = Table.PromoteHeaders(Csv, [PromoteAllScalars = true])\r\nin\r\n  PromotedHeaders;\r\nshared UserQuery = let\r\n  Source = wraglingdataset,\r\n  #\"Merged queries\" = Table.NestedJoin(Source, {\"id\"}, DelimitedText1, {\"deptid\"}, \"DelimitedText1\", JoinKind.FullOuter),\r\n  #\"Expanded DelimitedText1\" = Table.ExpandTableColumn(#\"Merged queries\", \"DelimitedText1\", {\"deptid\", \"deptname\"}, {\"DelimitedText1.deptid\", \"DelimitedText1.deptname\"}),\r\n  #\"Renamed columns\" = Table.RenameColumns(#\"Expanded DelimitedText1\", {{\"DelimitedText1.deptid\", \"deptid\"}, {\"DelimitedText1.deptname\", \"deptname\"}})\r\nin\r\n  #\"Renamed columns\";\r\n",
 			"documentLocale": "en-us"
 		}
 	}
