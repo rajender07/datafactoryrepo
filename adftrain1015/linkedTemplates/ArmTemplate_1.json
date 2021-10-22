@@ -13,7 +13,7 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/flatten_dataflow1')]",
+			"name": "[concat(parameters('factoryName'), '/union_dataflow1')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -22,7 +22,65 @@
 					"sources": [
 						{
 							"dataset": {
-								"referenceName": "Jsonstorage",
+								"referenceName": "DelimitedText1",
+								"type": "DatasetReference"
+							},
+							"name": "employee1"
+						},
+						{
+							"dataset": {
+								"referenceName": "DelimitedText1",
+								"type": "DatasetReference"
+							},
+							"name": "dept"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "output_DelimitedText2",
+								"type": "DatasetReference"
+							},
+							"name": "newbranchjoinop"
+						},
+						{
+							"dataset": {
+								"referenceName": "output_DelimitedText2",
+								"type": "DatasetReference"
+							},
+							"name": "newbranchaggop"
+						}
+					],
+					"transformations": [
+						{
+							"name": "Join1"
+						},
+						{
+							"name": "Aggregate1"
+						},
+						{
+							"name": "Select1"
+						},
+						{
+							"name": "Select2"
+						}
+					],
+					"script": "source(output(\n\t\tid as short,\n\t\tname as string,\n\t\tsal as short,\n\t\tdept as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> employee1\nsource(output(\n\t\tdeptid as string,\n\t\tdeptname as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> dept\nemployee1, dept join(dept == deptid,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> Join1\nemployee1 aggregate(groupBy(dept),\n\temployeecount = count(id)) ~> Aggregate1\nJoin1 select(mapColumn(\n\t\temployeeName = name,\n\t\tsal,\n\t\temployeeid = id,\n\t\tdeptname\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nAggregate1 select(mapColumn(\n\t\tdept,\n\t\temployeecount\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select2\nSelect1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['newbranch_join_op.csv'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> newbranchjoinop\nSelect2 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['newbranch_agg_op.csv'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tdept,\n\t\temployeecount\n\t),\n\tpartitionBy('hash', 1)) ~> newbranchaggop"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/validatedataflow1')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DelimitedText1",
 								"type": "DatasetReference"
 							},
 							"name": "source1"
@@ -37,15 +95,8 @@
 							"name": "sink1"
 						}
 					],
-					"transformations": [
-						{
-							"name": "Flatten1"
-						},
-						{
-							"name": "Filter1"
-						}
-					],
-					"script": "parameters{\n\tname as string\n}\nsource(output(\n\t\taddress as (city as string, state as string, country as string),\n\t\tcontact as (phone as string, email as string),\n\t\tid as string,\n\t\tname as string,\n\t\tskills as string[]\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tdocumentForm: 'arrayOfDocuments') ~> source1\nsource1 foldDown(unroll(skills),\n\tmapColumn(\n\t\tcity = address.city,\n\t\tstate = address.state,\n\t\tcountry = address.country,\n\t\tphone = contact.phone,\n\t\temail = contact.email,\n\t\tid,\n\t\tname,\n\t\tskills\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> Flatten1\nFlatten1 filter(equals(name,$name)) ~> Filter1\nFilter1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['flatten.csv'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> sink1"
+					"transformations": [],
+					"script": "source(output(\n\t\tid as integer,\n\t\tname as string,\n\t\tsal as integer,\n\t\tdept as string,\n\t\tgender as string\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: true,\n\tignoreNoFilesFound: false,\n\tpreferredIntegralType: 'integer') ~> source1\nsource1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['validateschema.csv'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> sink1"
 				}
 			},
 			"dependsOn": []
@@ -100,16 +151,14 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataflow": {
-								"referenceName": "flatten_dataflow1",
+								"referenceName": "validatedataflow1",
 								"type": "DataFlowReference",
-								"parameters": {
-									"name": {
-										"value": "'@{pipeline().parameters.pipeline_name}'",
-										"type": "Expression"
-									}
-								},
+								"parameters": {},
 								"datasetParameters": {
-									"source1": {},
+									"source1": {
+										"filename": "employee.csv",
+										"foldername": "input"
+									},
 									"sink1": {}
 								}
 							},
@@ -134,7 +183,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/flatten_dataflow1')]"
+				"[concat(variables('factoryId'), '/dataflows/validatedataflow1')]"
 			]
 		}
 	]
