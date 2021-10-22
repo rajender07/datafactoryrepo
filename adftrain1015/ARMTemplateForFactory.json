@@ -803,7 +803,12 @@
 							"dataflow": {
 								"referenceName": "flatten_dataflow1",
 								"type": "DataFlowReference",
-								"parameters": {},
+								"parameters": {
+									"name": {
+										"value": "'@{pipeline().parameters.pipeline_name}'",
+										"type": "Expression"
+									}
+								},
 								"datasetParameters": {
 									"source1": {},
 									"sink1": {}
@@ -821,6 +826,11 @@
 				"policy": {
 					"elapsedTimeMetric": {},
 					"cancelAfter": {}
+				},
+				"parameters": {
+					"pipeline_name": {
+						"type": "string"
+					}
 				},
 				"annotations": []
 			},
@@ -1774,9 +1784,12 @@
 					"transformations": [
 						{
 							"name": "Flatten1"
+						},
+						{
+							"name": "Filter1"
 						}
 					],
-					"script": "source(output(\n\t\taddress as (city as string, state as string, country as string),\n\t\tcontact as (phone as string, email as string),\n\t\tid as string,\n\t\tname as string,\n\t\tskills as string[]\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tdocumentForm: 'arrayOfDocuments') ~> source1\nsource1 foldDown(unroll(skills),\n\tmapColumn(\n\t\tcity = address.city,\n\t\tstate = address.state,\n\t\tcountry = address.country,\n\t\tphone = contact.phone,\n\t\temail = contact.email,\n\t\tid,\n\t\tname,\n\t\tskills\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> Flatten1\nFlatten1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['flatten.csv'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> sink1"
+					"script": "parameters{\n\tname as string\n}\nsource(output(\n\t\taddress as (city as string, state as string, country as string),\n\t\tcontact as (phone as string, email as string),\n\t\tid as string,\n\t\tname as string,\n\t\tskills as string[]\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tdocumentForm: 'arrayOfDocuments') ~> source1\nsource1 foldDown(unroll(skills),\n\tmapColumn(\n\t\tcity = address.city,\n\t\tstate = address.state,\n\t\tcountry = address.country,\n\t\tphone = contact.phone,\n\t\temail = contact.email,\n\t\tid,\n\t\tname,\n\t\tskills\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> Flatten1\nFlatten1 filter(equals(name,$name)) ~> Filter1\nFilter1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['flatten.csv'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> sink1"
 				}
 			},
 			"dependsOn": [
