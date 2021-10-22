@@ -1,0 +1,9 @@
+{
+	"name": "ADFtestingrepo",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "4b14f7dc-a55e-4435-8aca-4632ebf3217c",
+		"tenantId": "9a20e818-ff55-46db-810f-8ae9980a0876"
+	}
+}
