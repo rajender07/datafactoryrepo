@@ -18,15 +18,6 @@
 			"firstRowAsHeader": true,
 			"quoteChar": "\""
 		},
-		"schema": [
-			{
-				"name": "deptid",
-				"type": "String"
-			},
-			{
-				"name": "deptname",
-				"type": "String"
-			}
-		]
+		"schema": []
 	}
 }
