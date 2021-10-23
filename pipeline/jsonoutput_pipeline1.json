@@ -96,16 +96,60 @@
 													"type": "DelimitedTextReadSettings"
 												}
 											},
-											"enableStaging": false
+											"sink": {
+												"type": "DelimitedTextSink",
+												"storeSettings": {
+													"type": "AzureBlobStorageWriteSettings"
+												},
+												"formatSettings": {
+													"type": "DelimitedTextWriteSettings",
+													"quoteAllText": true,
+													"fileExtension": "*.csv"
+												}
+											},
+											"enableStaging": false,
+											"translator": {
+												"type": "TabularTranslator",
+												"typeConversion": true,
+												"typeConversionSettings": {
+													"allowDataTruncation": true,
+													"treatBooleanAsNumber": false
+												}
+											}
 										},
 										"inputs": [
 											{
 												"referenceName": "DelimitedText2",
+												"type": "DatasetReference",
+												"parameters": {
+													"filename": {
+														"value": "@variables('var_filename')",
+														"type": "Expression"
+													}
+												}
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "output_DelimitedText2",
 												"type": "DatasetReference"
 											}
 										]
 									}
 								]
+							}
+						},
+						{
+							"name": "Set variable1",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "var_filename",
+								"value": {
+									"value": "@item().name",
+									"type": "Expression"
+								}
 							}
 						}
 					]
