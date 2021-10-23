@@ -120,19 +120,19 @@
 										"inputs": [
 											{
 												"referenceName": "DelimitedText2",
-												"type": "DatasetReference",
-												"parameters": {
-													"filename": {
-														"value": "@variables('var_filename')",
-														"type": "Expression"
-													}
-												}
+												"type": "DatasetReference"
 											}
 										],
 										"outputs": [
 											{
 												"referenceName": "output_DelimitedText2",
-												"type": "DatasetReference"
+												"type": "DatasetReference",
+												"parameters": {
+													"outputfilename": {
+														"value": "@variables('var_filename')",
+														"type": "Expression"
+													}
+												}
 											}
 										]
 									}
